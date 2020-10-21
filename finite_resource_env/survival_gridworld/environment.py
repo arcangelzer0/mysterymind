@@ -402,10 +402,10 @@ class Environment:
         # Get instatnce id
         self.env_id = env_id
         
-    def custom_environment(self, gridmatrix, delta_s, start=None, end=None):
+    def custom_environment(self, gridmatrix, delta_s, start=None, end=None, block_val=None):
         
         # Set custom gridworld
-        self.gridmatrix = self.gridworld.SetCustomGridWorld(gridmatrix=gridmatrix, delta_s=delta_s, start=start, end=end)
+        self.gridmatrix = self.gridworld.SetCustomGridWorld(gridmatrix, delta_s, start, end, block_val)
         
         # Reinitialize control position
         self.control_position = self.gridworld.GetStartPoint()

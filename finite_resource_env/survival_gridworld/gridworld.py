@@ -251,6 +251,9 @@ class GridWorld:
         
         #game state game success
         self.success = False
+
+        #define block cell value
+        self.block_val = None
         
     def CreateGridWorld(self):
         
@@ -337,7 +340,7 @@ class GridWorld:
         
         return self.matrix
     
-    def SetCustomGridWorld(self, gridmatrix, delta_s, start=None, end=None):
+    def SetCustomGridWorld(self, gridmatrix, delta_s, start=None, end=None, block_val=None):
         
         #get dimension of the gridmatrix
         hgt = np.size(gridmatrix, 0)
@@ -368,6 +371,9 @@ class GridWorld:
             #set end point
             if(end != None): self.end = end    
             else: self.end = [0, 0]
+                
+            #set block value
+            self.block_val = block_val
               
             #set start point value to zero
             self.matrix[self.start[1]][self.start[0]] = 0
@@ -430,6 +436,7 @@ class GridWorld:
         color_grid = (200, 200, 200) #ash
         color_pnts = (2, 166, 249) #gold
         color_info = (40, 40, 40) #dark gray
+        color_bloc = (80, 80, 80) #gray
         
         #initialize render matrix
         render = np.ndarray(shape=[hgt, wid, 3], dtype=np.uint8)
@@ -497,6 +504,11 @@ class GridWorld:
                         else: x_add = 2 
                 cv2.putText(render, str(self.matrix[r][c]), (x + x_add, y + 18), cv2.FONT_HERSHEY_PLAIN, 0.8, (10, 10, 10), 1)
                 
+                #render block cells
+                if(self.block_val != None):
+                    if (self.matrix[r][c] == self.block_val):
+                        cv2.rectangle(render, (x, y), (x + cel_wid, y + cel_hgt), color_bloc, cv2.FILLED) 
+                
                 #render start and end points
                 if(r == self.start[1] and c == self.start[0]):
                     cv2.rectangle(render, (x, y), (x + cel_wid, y + cel_wid), color_pnts, cv2.FILLED)
@@ -517,7 +529,7 @@ class GridWorld:
     def ExecuteAction(self, action, position):
         
         #update agent position
-        new_position = position
+        new_position = position.copy()
         
         #check valid action
         valid_action = False
@@ -539,12 +551,17 @@ class GridWorld:
             if(position[0] + 1 < self.width):
                 new_position[0] += 1
                 valid_action = True
+               
+        #validate action on block cell
+        if(self.block_val != None):
+            if(self.matrix[new_position[1]][new_position[0]] == self.block_val):
+                new_position = position
+                valid_action = False
                 
         #initialize path value
         path_value = 0
         
         if(valid_action):
-            
             #get matrix value from the current position
             path_value = self.matrix[new_position[1]][new_position[0]]
             
